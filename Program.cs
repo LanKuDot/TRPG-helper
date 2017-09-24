@@ -10,8 +10,9 @@ namespace discordTRPGHelper
     class Program
     {
         private DiscordSocketClient _client;
+        private Dice _dice;
 
-        /**
+        /*
          * The entry point of the program.
          */
         static void Main(string[] args)
@@ -24,6 +25,8 @@ namespace discordTRPGHelper
             });
             _client.Log += Log;
             _client.MessageReceived += MessageReceived;
+
+            _dice = new Dice();
 
             /* Get the token of the bot from the external file */
             string token;
@@ -45,8 +48,8 @@ namespace discordTRPGHelper
 
         private async Task MessageReceived(SocketMessage msg)
         {
-            if (msg.Content == "!Ping") {
-                await msg.Channel.SendMessageAsync("Pong!");
+            if (msg.Content.Contains("D") || msg.Content.Contains("d")) {
+                await msg.Channel.SendMessageAsync(_dice.GetDiceResult(msg.Content));
             }
         }
     }
