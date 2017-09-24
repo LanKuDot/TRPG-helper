@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace discord_TRPG_helper
+namespace discordTRPGHelper
 {
     class Program
     {
