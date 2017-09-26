@@ -14,6 +14,9 @@ namespace discordTRPGHelper
 
         /*
          * @brief Get the dicing result in string.
+         *
+         * The method will return an empty string when the input _formula_ is invaild.
+         *
          * @param formula Specify the dicing formula, such as "4 + 6D6".
          * @return The dicing result in string.
          */
@@ -24,6 +27,9 @@ namespace discordTRPGHelper
 
             /* Handle the dice command */
             int[] diceResult = RollTheDice(formula);
+            if (diceResult == null) // The formula is invaild.
+                return "";
+
             outputStr.Append("=> " + formula + "(");
             foreach (int d in diceResult) {
                 result += d;
