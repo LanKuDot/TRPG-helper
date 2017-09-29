@@ -1,21 +1,33 @@
 ﻿using System;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace discordTRPGHelper
 {
     class Dice
     {
-        private Random _rnd;
+        private enum ElementType
+        {
+            Invaild = 0,
+            Number,
+            Dice
+        };
+
+        private Random _rnd;    // The dice
+        private Regex _regexForNum;
+        private Regex _regexForDice;
 
         public Dice()
         {
             _rnd = new Random();
+            _regexForNum = new Regex(@"^\d+$");
+            _regexForDice = new Regex(@"^\d*[Dd]\d+$");
         }
 
         /*
          * @brief Get the dicing result in string.
          *
-         * The method will return an empty string when the input _formula_ is invaild.
+         * The method will return an null string if the input _formula_ is invaild.
          *
          * @param formula Specify the dicing formula, such as "4 + 6D6".
          * @return The dicing result in string.
@@ -23,22 +35,125 @@ namespace discordTRPGHelper
         public string GetDiceResult(string formula)
         {
             StringBuilder outputStr = new StringBuilder();
-            int result = 0;
+            int finalSum = 0;
 
-            /* Handle the dice command */
-            int[] diceResult = RollTheDice(formula);
-            if (diceResult == null) // The formula is invaild.
-                return "";
+            /* Parse the dice formula */
+            // Remove all the spaces in the formula
+            formula = formula.Replace(" ", string.Empty);
 
-            outputStr.Append("=> " + formula + "(");
-            foreach (int d in diceResult) {
-                result += d;
-                outputStr.Append(d.ToString() + "+");
+            // Get each element from the formula and do corresponding action
+            char[] searchAny = { '+', '-' };
+            bool isPlus = true;
+            // operatorId always is the index of '+' or '-'.
+            // elementFrom and elementTo mark the substring index of the element.
+            int operatorId = formula.IndexOfAny(searchAny), elementFrom = 0, elementTo = 0;
+
+            // Insert a leading '+'
+            if (operatorId != 0) {
+                formula = formula.Insert(0, "+");
             }
-            outputStr[outputStr.Length - 1] = ')'; // Replace the last "+" to ")"
-            outputStr.Insert(0, result.ToString() + " ");
+
+            do {
+                /* Find the operator */
+                operatorId = formula.IndexOfAny(searchAny, elementFrom);
+                isPlus = (formula[operatorId] == '+') ? true : false;
+
+                /* Find the element */
+                elementFrom = operatorId + 1;
+                operatorId = formula.IndexOfAny(searchAny, elementFrom);
+                if (operatorId == -1)
+                    elementTo = formula.Length - 1;
+                else
+                    elementTo = operatorId - 1;
+
+                /* Get the element sum */
+                int[] elementResult = getElementResult(formula.Substring(elementFrom, elementTo - elementFrom + 1));
+                int elementSum = 0;
+                foreach (int i in elementResult)
+                    elementSum += i;
+
+                /* Add the final value of the element to the final result */
+                if (isPlus)
+                    finalSum += elementSum;
+                else
+                    finalSum -= elementSum;
+
+                /* Append the message to the output string */
+                // Append the operator
+                if (elementFrom == 1)    // Append the leading '-' if needed
+                    outputStr.Append(isPlus ? "" : "-");
+                else
+                    outputStr.Append(isPlus ? '+' : '-');
+
+                // Append the element sum
+                if (elementResult.Length == 1)
+                    outputStr.Append(elementSum.ToString());
+                else {  // The multiple dice result
+                    outputStr.Append('(');
+                    foreach(int i in elementResult)
+                        outputStr.Append(i.ToString() + "+");
+                    outputStr.Replace('+', ')', outputStr.Length - 1, 1);   // Replace the last '+'
+                }
+            } while (operatorId != -1);
+
+            /* Insert the final result at the begin of the string */
+            outputStr.Insert(0, finalSum.ToString() + " => ");
 
             return outputStr.ToString();
+        }
+
+        /*
+         * @brief Get the calculating result from the given element.
+         *
+         * If the input element is invaild, the method will return an array
+         * with only one element '0'.
+         *
+         * @param element Specify the content of the element.
+         * @return An array contains the result of each dice or a number.
+         */
+        private int[] getElementResult(string element)
+        {
+            int[] singleReult = { 0 };
+
+            switch (getElementType(element)) {
+            // The dice command
+            case ElementType.Dice:
+                int[] diceResult = RollTheDice(element);
+
+                // The formula is invaild
+                if (diceResult == null)
+                    break;
+
+                return diceResult;
+
+            // The number
+            case ElementType.Number:
+                singleReult[0] = int.Parse(element);
+                break;
+
+            // Invaild input
+            default:
+                break;
+            }
+
+            return singleReult;
+        }
+
+        /*
+         * @brief Get the type of the element in the formula
+         * @param element Specify the content of the element.
+         * @return The type of the element
+         */
+        private ElementType getElementType(string element)
+        {
+            if (string.IsNullOrEmpty(element))
+                return ElementType.Invaild;
+            if (_regexForNum.IsMatch(element))
+                return ElementType.Number;
+            if (_regexForDice.IsMatch(element))
+                return ElementType.Dice;
+
+            return ElementType.Invaild;
         }
 
         /*
