@@ -27,7 +27,11 @@ namespace discordTRPGHelper
         /*
          * @brief Get the dicing result in string.
          *
-         * The method will return an null string if the input _formula_ is invaild.
+         * The format of _formula_ is "[+/-]<element>(<+/-><element>)*".
+         * The _formula_ is seperated by '+' or '-', and all the substrings are "element".
+         * The dice (such as 3D4) and the number (such as 2) are the vaild elements, and
+         * invaild elements will generate 0.
+         * The method will return a null string if the input _formula_ contains continous operators.
          *
          * @param formula Specify the dicing formula, such as "4 + 6D6".
          * @return The dicing result in string.
@@ -65,6 +69,9 @@ namespace discordTRPGHelper
                     elementTo = formula.Length - 1;
                 else
                     elementTo = operatorId - 1;
+                // Invaild: Continous operators
+                if (operatorId == elementFrom)
+                    return null;
 
                 /* Get the element sum */
                 int[] elementResult = getElementResult(formula.Substring(elementFrom, elementTo - elementFrom + 1));
