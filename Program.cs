@@ -23,7 +23,7 @@ namespace discordTRPGHelper
             _client = new DiscordSocketClient(new DiscordSocketConfig {
                 WebSocketProvider = WS4NetProvider.Instance,
             });
-            _client.Log += Log;
+            _client.Log += Logger;
             _client.MessageReceived += MessageReceived;
 
             _dice = new Dice();
@@ -40,9 +40,34 @@ namespace discordTRPGHelper
             await Task.Delay(-1);
         }
 
-        private Task Log(LogMessage msg)
+        /*
+         * @brief The logging handler
+         */
+        private static Task Logger(LogMessage msg)
         {
-            Console.WriteLine(msg.ToString());
+            ConsoleColor orginalColor = Console.ForegroundColor;
+
+            // Color the message
+            switch (msg.Severity) {
+            case LogSeverity.Critical:
+            case LogSeverity.Error:
+                Console.ForegroundColor = ConsoleColor.Red;
+                break;
+            case LogSeverity.Warning:
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                break;
+            case LogSeverity.Debug:
+            case LogSeverity.Verbose:
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                break;
+            default:
+                Console.ForegroundColor = ConsoleColor.White;
+                break;
+            }
+
+            Console.WriteLine($"{DateTime.Now:tt hh:mm:dd} [{msg.Severity, 8}] {msg.Source} : {msg.Message}");
+            Console.ForegroundColor = orginalColor;
+
             return Task.CompletedTask;
         }
 
