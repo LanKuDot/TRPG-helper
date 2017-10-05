@@ -23,7 +23,7 @@ namespace discordTRPGHelper
         }
 
         /*
-         * @brief Get the dicing result in string.
+         * @brief Calculate the dicing result from formula and return the result in string.
          *
          * The format of _formula_ is "[+/-]<element>(<+/-><element>)*".
          * The _formula_ is seperated by '+' or '-', and all the substrings are "element".
@@ -34,7 +34,7 @@ namespace discordTRPGHelper
          * @param formula Specify the dicing formula, such as "4 + 6D6".
          * @return The dicing result in string.
          */
-        public string GetDiceResult(string formula)
+        private string Calculate(string formula)
         {
             StringBuilder outputStr = new StringBuilder();
             int finalSum = 0;
@@ -72,7 +72,7 @@ namespace discordTRPGHelper
                     return null;
 
                 /* Get the element sum */
-                int[] elementResult = getElementResult(formula.Substring(elementFrom, elementTo - elementFrom + 1));
+                int[] elementResult = GetElementResult(formula.Substring(elementFrom, elementTo - elementFrom + 1));
                 int elementSum = 0;
                 foreach (int i in elementResult)
                     elementSum += i;
@@ -116,14 +116,14 @@ namespace discordTRPGHelper
          * @param element Specify the content of the element.
          * @return An array contains the result of each dice or a number.
          */
-        private int[] getElementResult(string element)
+        private int[] GetElementResult(string element)
         {
             int[] singleReult = { 0 };
 
-            switch (getElementType(element)) {
+            switch (GetElementType(element)) {
             // The dice command
             case ElementType.Dice:
-                int[] diceResult = RollTheDice(element);
+                int[] diceResult = GetDiceResult(element);
 
                 // The formula is invaild
                 if (diceResult == null)
@@ -149,7 +149,7 @@ namespace discordTRPGHelper
          * @param element Specify the content of the element.
          * @return The type of the element
          */
-        private ElementType getElementType(string element)
+        private ElementType GetElementType(string element)
         {
 			int i;
 
@@ -173,7 +173,7 @@ namespace discordTRPGHelper
          * @return An array of the dicing result of each dice
          * @retval null If the diceCmd is invaild.
          */
-        private int[] RollTheDice(string diceCmd)
+        private int[] GetDiceResult(string diceCmd)
         {
             int dices, faces;
 
