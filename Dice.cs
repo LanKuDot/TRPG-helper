@@ -14,13 +14,11 @@ namespace discordTRPGHelper
         };
 
         private Random _rnd;    // The dice
-        private Regex _regexForNum;
         private Regex _regexForDice;
 
         public Dice()
         {
             _rnd = new Random();
-            _regexForNum = new Regex(@"^\d+$");
             _regexForDice = new Regex(@"^\d*[Dd]\d+$");
         }
 
@@ -153,9 +151,11 @@ namespace discordTRPGHelper
          */
         private ElementType getElementType(string element)
         {
+			int i;
+
             if (string.IsNullOrEmpty(element))
                 return ElementType.Invaild;
-            if (_regexForNum.IsMatch(element))
+            if (int.TryParse(element, out i))
                 return ElementType.Number;
             if (_regexForDice.IsMatch(element))
                 return ElementType.Dice;
