@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Discord.Commands;
 
 namespace discordTRPGHelper
 {
-    class Dice
+    public class Dice : ModuleBase<SocketCommandContext>
     {
         private enum ElementType
         {
@@ -20,6 +22,23 @@ namespace discordTRPGHelper
         {
             _rnd = new Random();
             _regexForDice = new Regex(@"^\d*[Dd]\d+$");
+        }
+
+        /*
+         * @brief The slot for the command \"!dice <dice_formula>\"
+         *
+         * For the format of the _dice\_formula_, please see Calculate().
+         */
+        [Command("dice")]
+        [Summary("Roll the dice")]
+        public async Task RollTheDice([Remainder][Summary("The dicing formula")]string diceFormula)
+        {
+            string result = Calculate(diceFormula);
+
+            if (string.IsNullOrEmpty(result))
+                result = "Bad dice formula";
+
+            await ReplyAsync(result);
         }
 
         /*
