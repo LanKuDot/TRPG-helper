@@ -30,6 +30,7 @@ namespace discordTRPGHelper
          * For the format of the _dice\_formula_, please see Calculate().
          */
         [Command("dice")]
+        [Alias("骰")]
         [Summary("Roll the dice")]
         public async Task RollTheDice([Remainder][Summary("The dicing formula")]string diceFormula)
         {
