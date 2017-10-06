@@ -1,16 +1,20 @@
 ﻿using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using Discord.Net.Providers.WS4Net;
 using System;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace discordTRPGHelper
 {
     class Program
     {
         private DiscordSocketClient _client;
-        private Dice _dice;
+        private CommandService _commands;
+        private IServiceProvider _services;
 
         /*
          * The entry point of the program.
@@ -26,7 +30,11 @@ namespace discordTRPGHelper
             _client.Log += Logger;
             _client.MessageReceived += MessageReceived;
 
-            _dice = new Dice();
+            _commands = new CommandService();
+            _services = new ServiceCollection()
+                .AddSingleton(_client)
+                .AddSingleton(_commands)
+                .BuildServiceProvider();
 
             /* Get the token of the bot from the external file */
             string token;
@@ -34,10 +42,20 @@ namespace discordTRPGHelper
                 token = reader.ReadLine();
             }
 
+            await InstalCommandAsync();
+
             await _client.LoginAsync(TokenType.Bot, token);
             await _client.StartAsync();
 
             await Task.Delay(-1);
+        }
+
+        /*
+         * @brief Load all the commands in this assembly.
+         */
+        private async Task InstalCommandAsync()
+        {
+            await _commands.AddModulesAsync(Assembly.GetEntryAssembly());
         }
 
         /*
@@ -73,9 +91,23 @@ namespace discordTRPGHelper
 
         private async Task MessageReceived(SocketMessage msg)
         {
-            if (msg.Content.Contains("D") || msg.Content.Contains("d")) {
-                await msg.Channel.SendMessageAsync(_dice.GetDiceResult(msg.Content));
-            }
+            /* Only handle the user message. */
+            var message = msg as SocketUserMessage;
+            if (message == null)
+                return;
+
+            int argPos = 0;
+            // If the message starts with '!' or the robot is mentioned,
+            // that is the command
+            if (!(message.HasCharPrefix('!', ref argPos) ||
+                message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
+                return;
+            // Create a Command context
+            var context = new SocketCommandContext(_client, message);
+            // Execute the command
+            var result = await _commands.ExecuteAsync(context, argPos, _services);
+            if (!result.IsSuccess)
+                await context.Channel.SendMessageAsync(result.ErrorReason);
         }
     }
 }
