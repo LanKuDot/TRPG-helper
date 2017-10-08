@@ -39,7 +39,9 @@ namespace discordTRPGHelper
             if (string.IsNullOrEmpty(result))
                 result = "Bad dice formula";
 
-            await ReplyAsync(result);
+            // Get the user who types the command
+            var user = Context.User;
+            await ReplyAsync($"{user.Mention} {result}");
         }
 
         /*
