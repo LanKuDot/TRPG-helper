@@ -15,6 +15,7 @@ namespace discordTRPGHelper
         private DiscordSocketClient _client;
         private CommandService _commands;
         private IServiceProvider _services;
+        private StoryRecorder _storyRecorder;
 
         /*
          * The entry point of the program.
@@ -30,10 +31,13 @@ namespace discordTRPGHelper
             _client.Log += Logger;
             _client.MessageReceived += MessageReceived;
 
+            _storyRecorder = new StoryRecorder();
+
             _commands = new CommandService();
             _services = new ServiceCollection()
                 .AddSingleton(_client)
                 .AddSingleton(_commands)
+                .AddSingleton(_storyRecorder)
                 .BuildServiceProvider();
 
             /* Get the token of the bot from the external file */
