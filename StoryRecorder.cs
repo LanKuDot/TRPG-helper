@@ -80,6 +80,7 @@ namespace discordTRPGHelper
          * Create a new file to record the story.
          */
         [Command("createStory")]
+        [Alias("創造故事")]
         [Summary("Create a new file to record the story")]
         public async Task CreateStory([Summary("[Optional] Specify the storyname")]string storyname = "")
         {
