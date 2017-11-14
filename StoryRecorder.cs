@@ -10,6 +10,10 @@ namespace discordTRPGHelper
     public class StoryRecorder
     {
         /*
+         * @brief Is the recorder recording?
+         */
+        public bool Recording = false;
+        /*
          * @brief The path of the directory where storing the story.
          */
         public const string outputDirectory = "./StoryRecord/";
@@ -86,6 +90,40 @@ namespace discordTRPGHelper
         {
             _storyRecorder.CreateNewFile(storyname);
             await ReplyAsync("Create new file " + _storyRecorder.GetCurrentSaveFilename() + " to record the story.");
+        }
+
+        /*
+         * @brief Make StoryRecorder start recording the story.
+         *
+         * If the output filename is not specified, this method will call CreateStory() first.
+         */
+        [Command("startRecord")]
+        [Alias("記錄故事")]
+        [Summary("Start recording the story.")]
+        public async Task StartRecordStory()
+        {
+            _storyRecorder.Recording = true;
+
+            // If the filename is not specified, initialize it.
+            if (string.IsNullOrEmpty(_storyRecorder.GetCurrentSaveFilename()))
+                await CreateStory();
+
+            await ReplyAsync("Start recording the story.");
+        }
+
+        /*
+         * @brief Make StoryRecorder stop recording the story.
+         */
+        [Command("stopRecord")]
+        [Alias("停止記錄")]
+        [Summary("Stop recording the story.")]
+        public async Task StopRecordStory()
+        {
+            _storyRecorder.Recording = false;
+
+            // TODO make StoryRecorder flush the container to the file.
+
+            await ReplyAsync("Stop recording the story.");
         }
     }
 }
