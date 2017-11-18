@@ -3,6 +3,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Discord.Net.Providers.WS4Net;
 using System;
+using System.Linq;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -99,6 +100,14 @@ namespace discordTRPGHelper
             var message = msg as SocketUserMessage;
             if (message == null)
                 return;
+
+            /* Store the story. */
+            bool isStorySaved;
+            _storyRecorder.AppendNewStory(message.Author as SocketGuildUser, message.Content, out isStorySaved);
+            if (isStorySaved) {
+                var channel = message.Channel;
+                await channel.SendMessageAsync("Story saved");
+            }
 
             int argPos = 0;
             // If the message starts with '!' or the robot is mentioned,

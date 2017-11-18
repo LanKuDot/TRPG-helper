@@ -1,8 +1,10 @@
 ﻿/* Help recording the story and export to an external file.
  */
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Discord.WebSocket;
 using Discord.Commands;
 
 namespace discordTRPGHelper
@@ -19,6 +21,18 @@ namespace discordTRPGHelper
         public const string outputDirectory = "./StoryRecord/";
 
         /*
+         * @brief The container that temporarily storing the story.
+         */
+        private string[] _sentences;
+        /*
+         * @brief The maximum number of sentences can be stored in _sentences.
+         */
+        private const int _maxNumOfSentences = 5;
+        /*
+         * @brief Mark the element of the next slot for saving new sentence in _sentences.
+         */
+        private int _currentNumOfSentences;
+        /*
          * @brief The filename of the output file.
          */
         private string _outputFilename = "";
@@ -28,6 +42,40 @@ namespace discordTRPGHelper
          */
         public StoryRecorder()
         {
+            _sentences = new string[_maxNumOfSentences];
+            _currentNumOfSentences = 0;
+        }
+
+        /*
+         * @brief Append a new sentence to the container.
+         * @param user The information of user
+         * @param message The message that is sent by the user.
+         * @param isFlushed [out] true If the story in the container is flushed to the file.
+         * @return The number of sentences storing in the container.
+         * @retval -1 If the Recording flag is false.
+         */
+        public int AppendNewStory(SocketGuildUser user, string message, out bool isFlushed)
+        {
+            isFlushed = false;
+
+            if (!Recording)
+                return -1;
+
+            /* Get the role of the user. */
+            IEnumerator<SocketRole> roles = user.Roles.GetEnumerator();
+            roles.MoveNext();   // Ignore "@everyone"
+            roles.MoveNext();
+
+            _sentences[_currentNumOfSentences++] = $"[{roles.Current.Name}] {user.Nickname}: {message}";
+
+            /* Flush the story in the container to the file once the container is full. */
+            if (_currentNumOfSentences == _maxNumOfSentences) {
+                FlushToFile();
+                _currentNumOfSentences = 0;
+                isFlushed = true;
+            }
+
+            return _currentNumOfSentences;
         }
 
         /*========= File operations ==========*/
@@ -57,6 +105,29 @@ namespace discordTRPGHelper
         public string GetCurrentSaveFilename()
         {
             return _outputFilename;
+        }
+
+        /*
+         * @brief Flush all the sentences in the container to the external file.
+         *
+         * This method should be called once the container is full.
+         * Note that the program will wait until the writing process finishes.
+         */
+        public void FlushToFile()
+        {
+            if (_currentNumOfSentences == 0)
+                return;
+
+            try {
+                using (StreamWriter file = new StreamWriter(Path.Combine(outputDirectory, _outputFilename), true)) {
+                    for (int i = 0; i < _currentNumOfSentences; ++i)
+                        file.WriteLine(_sentences[i]);
+                }
+            } catch (Exception e) {
+                Console.WriteLine(e.Message);
+            }
+
+            _currentNumOfSentences = 0;
         }
     }
 
@@ -120,10 +191,9 @@ namespace discordTRPGHelper
         public async Task StopRecordStory()
         {
             _storyRecorder.Recording = false;
+            _storyRecorder.FlushToFile();
 
-            // TODO make StoryRecorder flush the container to the file.
-
-            await ReplyAsync("Stop recording the story.");
+            await ReplyAsync("Stop recording the story. Story saved.");
         }
     }
 }
