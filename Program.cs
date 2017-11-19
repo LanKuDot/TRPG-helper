@@ -68,29 +68,7 @@ namespace discordTRPGHelper
          */
         private static Task Logger(LogMessage msg)
         {
-            ConsoleColor orginalColor = Console.ForegroundColor;
-
-            // Color the message
-            switch (msg.Severity) {
-            case LogSeverity.Critical:
-            case LogSeverity.Error:
-                Console.ForegroundColor = ConsoleColor.Red;
-                break;
-            case LogSeverity.Warning:
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                break;
-            case LogSeverity.Debug:
-            case LogSeverity.Verbose:
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                break;
-            default:
-                Console.ForegroundColor = ConsoleColor.White;
-                break;
-            }
-
-            Console.WriteLine($"{DateTime.Now:tt hh:mm:dd} [{msg.Severity, 8}] {msg.Source} : {msg.Message}");
-            Console.ForegroundColor = orginalColor;
-
+            ConsoleManager.Message(msg.Severity, msg.Source, msg.Message);
             return Task.CompletedTask;
         }
 
