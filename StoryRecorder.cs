@@ -12,14 +12,27 @@ namespace discordTRPGHelper
     public class StoryRecorder
     {
         /*
-         * @brief Is the recorder recording?
-         */
-        public bool Recording = false;
-        /*
          * @brief The path of the directory where storing the story.
          */
         public const string outputDirectory = "./StoryRecord/";
 
+        /*
+         * @brief Is the recorder recording?
+         */
+        private bool _recording = false;
+        public bool Recording
+        {
+            get { return _recording; }
+            set {
+                _recording = value;
+                if (value)  // true
+                    ConsoleManager.Message(Discord.LogSeverity.Info, GetType().Name,
+                        "Start recording the story");
+                else
+                    ConsoleManager.Message(Discord.LogSeverity.Info, GetType().Name,
+                        "Stop recording the story");
+            }
+        }
         /*
          * @brief The container that temporarily storing the story.
          */
@@ -58,7 +71,7 @@ namespace discordTRPGHelper
         {
             isFlushed = false;
 
-            if (!Recording)
+            if (!_recording)
                 return -1;
 
             /* Get the role of the user. */
@@ -97,6 +110,9 @@ namespace discordTRPGHelper
                 _outputFilename = $"{filename}.txt";
 
             using (File.Create(Path.Combine(outputDirectory, _outputFilename))) { }
+
+            ConsoleManager.Message(Discord.LogSeverity.Info, GetType().Name,
+                $"New file {_outputFilename} is created for recording the story");
         }
 
         /*
@@ -128,6 +144,8 @@ namespace discordTRPGHelper
             }
 
             _currentNumOfSentences = 0;
+
+            ConsoleManager.Message(Discord.LogSeverity.Info, GetType().Name, "Story saved");
         }
     }
 
@@ -160,7 +178,7 @@ namespace discordTRPGHelper
         public async Task CreateStory([Summary("[Optional] Specify the storyname")]string storyname = "")
         {
             _storyRecorder.CreateNewFile(storyname);
-            await ReplyAsync("Create new file " + _storyRecorder.GetCurrentSaveFilename() + " to record the story.");
+            await ReplyAsync("Create new file " + _storyRecorder.GetCurrentSaveFilename() + " to record the story");
         }
 
         /*
