@@ -74,6 +74,10 @@ namespace discordTRPGHelper
             if (!_recording)
                 return -1;
 
+            /* Filter the command, only recording the dice command. */
+            if (message.StartsWith("!") && !message.StartsWith("!dice"))
+                return _currentNumOfSentences;
+
             /* Get the role of the user. */
             IEnumerator<SocketRole> roles = user.Roles.GetEnumerator();
             roles.MoveNext();   // Ignore "@everyone"

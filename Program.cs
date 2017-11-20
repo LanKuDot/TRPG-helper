@@ -80,8 +80,11 @@ namespace discordTRPGHelper
                 return;
 
             /* Store the story. */
-            bool isStorySaved;
-            _storyRecorder.AppendNewStory(message.Author as SocketGuildUser, message.Content, out isStorySaved);
+            bool isStorySaved = false;
+            // For bot: only record the dice result message.
+            if ((message.Author.IsBot && msg.Content.Contains("=>")) ||
+                !message.Author.IsBot)
+                _storyRecorder.AppendNewStory(message.Author as SocketGuildUser, message.Content, out isStorySaved);
             if (isStorySaved) {
                 var channel = message.Channel;
                 await channel.SendMessageAsync("Story saved");
