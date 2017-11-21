@@ -178,6 +178,7 @@ namespace discordTRPGHelper
          */
         [Command("createStory")]
         [Alias("創造故事")]
+        [RequireGMPermission]
         [Summary("Create a new file to record the story")]
         public async Task CreateStory([Summary("[Optional] Specify the storyname")]string storyname = "")
         {
@@ -192,6 +193,7 @@ namespace discordTRPGHelper
          */
         [Command("startRecord")]
         [Alias("記錄故事")]
+        [RequireGMPermission]
         [Summary("Start recording the story.")]
         public async Task StartRecordStory()
         {
@@ -209,6 +211,7 @@ namespace discordTRPGHelper
          */
         [Command("stopRecord")]
         [Alias("停止記錄")]
+        [RequireGMPermission]
         [Summary("Stop recording the story.")]
         public async Task StopRecordStory()
         {
