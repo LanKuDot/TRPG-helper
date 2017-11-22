@@ -80,8 +80,8 @@ namespace discordTRPGHelper
 
             /* Get the role of the user. */
             IEnumerator<SocketRole> roles = user.Roles.GetEnumerator();
+            roles.MoveNext();   // Move to the first item
             roles.MoveNext();   // Ignore "@everyone"
-            roles.MoveNext();
 
             _sentences[_currentNumOfSentences++] = $"[{roles.Current.Name}] {user.Nickname}: {message}";
 

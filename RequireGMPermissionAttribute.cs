@@ -13,8 +13,8 @@ namespace discordTRPGHelper
             var user = context.User as SocketGuildUser;
             // Get the user roles
             IEnumerator<SocketRole> roles = user.Roles.GetEnumerator();
-            roles.MoveNext();
-            roles.MoveNext();
+            roles.MoveNext();   // Move to the first item
+            roles.MoveNext();   // Ignore "@everyone"
 
             if (roles.Current.Name == "GM")
                 return PreconditionResult.FromSuccess();
