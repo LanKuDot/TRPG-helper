@@ -192,7 +192,7 @@ namespace discordTRPGHelper
          * If the output filename is not specified, this method will call CreateStory() first.
          */
         [Command("startRecord")]
-        [Alias("記錄故事")]
+        [Alias("開始記錄")]
         [RequireGMPermission]
         [Summary("Start recording the story.")]
         public async Task StartRecordStory()
@@ -225,8 +225,8 @@ namespace discordTRPGHelper
          * @brief List the latest n record files.
          * @param listNum Specify the latest n files to be listed.
          */
-        [Command("listRecord")]
-        [Alias("列出記錄")]
+        [Command("listStory")]
+        [Alias("列出故事")]
         [RequireGMPermission]
         [Summary("List the latest record files")]
         public async Task ListStoryFiles([Summary("[Optional] Specify the latest n files to show.")]int listNum = 5)
