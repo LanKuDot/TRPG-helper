@@ -220,5 +220,41 @@ namespace discordTRPGHelper
 
             await ReplyAsync("Stop recording the story. Story saved.");
         }
+
+        /*
+         * @brief List the latest n record files.
+         * @param listNum Specify the latest n files to be listed.
+         */
+        [Command("listRecord")]
+        [Alias("列出記錄")]
+        [RequireGMPermission]
+        [Summary("List the latest record files")]
+        public async Task ListStoryFiles([Summary("[Optional] Specify the latest n files to show.")]int listNum = 5)
+        {
+            // If the output directory is not existing, quit.
+            if (!Directory.Exists(StoryRecorder.outputDirectory)) {
+                await ReplyAsync("There has no record yet.");
+                return;
+            }
+
+            /* List files */
+            string[] recordFiles = Directory.GetFiles(StoryRecorder.outputDirectory, "*.txt", SearchOption.TopDirectoryOnly);
+            if (recordFiles.Length == 0)
+                await ReplyAsync("There has no record yet.");
+            else {
+                string replyString = "";
+                int i;
+
+                for (i = recordFiles.Length - 1; listNum != 0 && i >= 0; --i, --listNum)
+                    replyString += Path.GetFileName(recordFiles[i]) + "\n";
+
+                if (i < 0)
+                    replyString += "--END--";
+                else
+                    replyString += $"--{i+1} MORE--";
+
+                await ReplyAsync(replyString);
+            }
+        }
     }
 }
